@@ -1,6 +1,15 @@
 import React from "react";
 
 const App = () => {
+  const handleClick = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/test/api");
+      const data = await res.json();
+      console.log(data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
   return (
     <div className="p-3 max-w-lg mx-auto">
       <div className="flex flex-col gap-2 ">
@@ -28,7 +37,10 @@ const App = () => {
             Create Account
           </button>
         </form>
-        <button className="p-3 rounded-lg border bg-red-700 hover:opacity-80 text-white font-semibold">
+        <button
+          onClick={handleClick}
+          className="p-3 rounded-lg border bg-red-700 hover:opacity-80 text-white font-semibold"
+        >
           Sign with Google
         </button>
         <div className="flex items-center gap-2 mt-3">
