@@ -1,6 +1,10 @@
 import { uploadOnCloudinary } from "../config/cloudinary.js";
 import { errorHandler } from "../config/error.js";
+import { extractTextFromPdf } from "../config/pdfParse.js";
+import { resumeCleanup } from "../config/resumeCleanup.js";
+import { analyzeResume } from "../config/gemini.js";
 import Resume from "../models/resume.model.js";
+import axios from "axios";
 
 export const uploadResume = async (req, res, next) => {
   try {
@@ -21,6 +25,34 @@ export const uploadResume = async (req, res, next) => {
       success: true,
       message: "File uploaded successfully",
       resume,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const fetchPdfBuffer = async (url) => {
+  try {
+    const response = await axios.get(url, { responseType: "arraybuffer" });
+    return Buffer.from(response.data);
+  } catch (error) {
+    console.error("Failed to fetch PDF:", error.message);
+  }
+};
+
+export const analyzeResumeController = async (req, res, next) => {
+  try {
+    const { resumeId } = req.params;
+    const resume = await Resume.findById(resumeId);
+    if (!resume) return next(errorHandler(404, "Resume not found"));
+    const pdfBuffer = await fetchPdfBuffer(resume.fileUrl);
+    const response = await extractTextFromPdf(pdfBuffer);
+    const rawText = response.text;
+    const cleaned = resumeCleanup(rawText).cleanedText;
+    const analysis = await analyzeResume(cleaned);
+    res.status(200).json({
+      success: true,
+      analysis,
     });
   } catch (error) {
     next(error);

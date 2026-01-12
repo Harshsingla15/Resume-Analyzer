@@ -15,6 +15,7 @@ export const uploadOnCloudinary = async (localFilePath) => {
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "raw",
       folder: "resumes",
+      type: "upload",
     });
     fs.unlinkSync(localFilePath);
     return response;

@@ -5,6 +5,7 @@ import authRoute from "./routes/auth.route.js";
 import resumeRoute from "./routes/resume.route.js";
 import dotenv from "dotenv";
 dotenv.config();
+
 import { verifyToken } from "./config/verifyToken.js";
 
 connectDB();
@@ -14,6 +15,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
+app.use("/uploads", express.static("uploads"));
 
 app.listen(PORT, () => {
   console.log(`Server started at port ${PORT}`);
