@@ -4,6 +4,7 @@ import { extractTextFromPdf } from "../config/pdfParse.js";
 import { resumeCleanup } from "../config/resumeCleanup.js";
 import { analyzeResume } from "../config/gemini.js";
 import Resume from "../models/resume.model.js";
+import Analysis from "../models/analysis.model.js";
 import axios from "axios";
 
 export const uploadResume = async (req, res, next) => {
@@ -50,9 +51,27 @@ export const analyzeResumeController = async (req, res, next) => {
     const rawText = response.text;
     const cleaned = resumeCleanup(rawText).cleanedText;
     const analysis = await analyzeResume(cleaned);
+    const savedAnalysis = await Analysis.findOneAndUpdate(
+      { resumeId },
+      {
+        userId: req.user,
+        resumeId,
+        summary: analysis.summary,
+        skills: analysis.skills,
+        experienceLevel: analysis.experience_level,
+        atsScore: analysis.ats_score,
+        suggestions: analysis.suggestions,
+      },
+      {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+      }
+    );
+
     res.status(200).json({
       success: true,
-      analysis,
+      analysis: savedAnalysis,
     });
   } catch (error) {
     next(error);

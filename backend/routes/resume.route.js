@@ -9,6 +9,6 @@ import {
 const router = express.Router();
 
 router.post("/upload", verifyToken, upload.single("resume"), uploadResume);
-router.post("/analyze/:resumeId", verifyToken, analyzeResumeController);
+router.get("/analyze/:resumeId", verifyToken, analyzeResumeController);
 
 export default router;
